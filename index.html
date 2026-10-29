@@ -22,6 +22,9 @@ nav.tabs button{border-radius:14px;min-height:48px;font-weight:700;padding:10px 
 .tabs button[aria-pressed=true],.seg button[aria-pressed=true],.chip[aria-pressed=true]{background:var(--spruce);color:var(--fog);border-color:var(--spruce)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
 .seg{display:flex;gap:6px}
+.seg.g2,.seg.g3{display:grid;margin:10px 0}
+.seg.g2{grid-template-columns:1fr 1fr}
+.seg.g3{grid-template-columns:repeat(3,1fr)}
 label{font-size:14px;color:var(--mute);display:flex;flex-direction:column;gap:3px}
 select,input{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 10px;min-height:40px}
 .hero{background:var(--spruce);color:var(--fog);border-radius:20px;padding:22px 20px;margin:14px 0}
@@ -68,11 +71,8 @@ h3{font-size:16px;margin:22px 0 8px}
 </header>
 
 <main id="v-today">
-  <div class="row">
-    <div class="seg" id="dayseg"><button data-a="day" data-v="0">Hoje</button><button data-a="day" data-v="1">Amanhã</button></div>
-    <div class="seg"><button data-a="mode" data-v="c">Casual</button><button data-a="mode" data-v="f">Formal</button></div>
-  </div>
-  <div class="row" id="chips">
+  <div class="seg g2" id="dayseg"><button data-a="day" data-v="0">Hoje</button><button data-a="day" data-v="1">Amanhã</button></div>
+  <div class="seg g3" id="chips">
     <button class="chip" data-a="per" data-v="0">Manhã</button>
     <button class="chip" data-a="per" data-v="1">Tarde</button>
     <button class="chip" data-a="per" data-v="2">Noite</button>
@@ -83,6 +83,7 @@ h3{font-size:16px;margin:22px 0 8px}
     <label>Local <select id="loc"></select></label>
     <button class="mini" data-a="gps">Usar a minha localização</button>
   </div>
+  <div class="seg g2"><button data-a="mode" data-v="c">Casual</button><button data-a="mode" data-v="f">Formal</button></div>
   <div id="out"></div>
 </main>
 
@@ -193,12 +194,12 @@ function render(){
     if(g.tmin>best.hi+2)w.push(`Esta é a peça mais leve que tens neste modo, mas deve ficar quente (mínimo de ${Math.round(g.tmin)} °C).`);
     w.forEach(x=>h+=`<div class="warn">${esc(x)}</div>`);h+="</section>";
   }
+  if(g.C.length>1&&g.pool.length&&!tshirt)h+=`<h3>Alternativas</h3>`+g.C.slice(1).map(c=>`<div class="alt">${esc(nm(c))}</div>`).join("");
   const mx=k=>Math.max(...R.map(r=>r[k])),cm=Math.round(R.reduce((a,r)=>a+r.c,0)/R.length);
-  h+=`<dl><div><dt>Sensação térmica</dt><dd>${Math.round(g.tmin)} a ${Math.round(g.tmax)} °C</dd><dd>mais frio às ${g.rmin.t}</dd></div>
+  h+=`<h3>Condições</h3><dl><div><dt>Sensação térmica</dt><dd>${Math.round(g.tmin)} a ${Math.round(g.tmax)} °C</dd><dd>mais frio às ${g.rmin.t}</dd></div>
   <div><dt>Vento médio</dt><dd>até ${Math.round(g.vmax)} km/h</dd><dd>${g.wn===2?"forte, peça corta-vento":g.wn===1?"moderado, ajuda corta-vento":"fraco"}</dd></div>
   <div><dt>Chuva</dt><dd>${mx("mm").toFixed(1).replace(".",",")} mm</dd><dd>probabilidade até ${Math.round(mx("p"))}%${g.rn?`, impermeável ${RL[g.rn]} às ${g.rr.t}`:""}</dd></div>
   <div><dt>Sol</dt><dd>${Math.round(mx("s"))} W/m²</dd><dd>céu ${cm}% nublado; já está contado na sensação térmica</dd></div></dl>`;
-  if(g.C.length>1&&g.pool.length&&!tshirt)h+=`<h3>Alternativas</h3>`+g.C.slice(1).map(c=>`<div class="alt">${esc(nm(c))}</div>`).join("");
   h+=`<h3>Hora a hora</h3><div class="strip">`+R.map(r=>`<div class="cell${r.mm>0&&r.p>=S.thr?" wet":""}">${r.t}<b>${Math.round(r.f)}°</b>${Math.round(r.v)} km/h<br>${r.mm.toFixed(1).replace(".",",")} mm</div>`).join("")+`</div>`;
   out.innerHTML=h;
 }
